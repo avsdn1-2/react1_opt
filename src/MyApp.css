@@ -7,4 +7,9 @@
 {
   margin-bottom:10px;
 }
-
+.border_class
+{
+  width:300px;
+  border:2px solid yellow;
+  margin:0 auto 10px auto;
+}
