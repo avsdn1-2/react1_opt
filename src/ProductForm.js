@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import Button from "./button";
 
 const categories = ['php', 'js', 'python'];
 const types = ["application","patch"];
@@ -24,18 +23,22 @@ class ProductForm extends Component {
         action: false,
         country: null,
         products: [],
+        isStart: true,
+        isErrorImageLink: true,
+        isErrorType: true,
         isErrorCategory: true,
+        isErrorForm: true,
 
     };
     handleSubmit = this.props.handleSubmit;
 
-    handleChangeTextInput = (e) => {
-        let { target } = e,
-            name = target.name,
-            val = target.value;
-
+    handleChangeCode = (e) => {
+        let val = e.target.value;
+        //удаляем любой символ, не являющийся числом
+        val = val.replace(/\D/gmi, '');
+        //записываем состояние
         this.setState({
-            [name]: val,
+            code: val,
         });
     };
 
@@ -44,7 +47,6 @@ class ProductForm extends Component {
         name = target.name,
         val = target.value;
         let current = this.state.category;
-        //console.log(current);
 
         if (current.find((el)=> el == name)){
             this.state.category = current.filter((el)=> el != name)
@@ -52,90 +54,79 @@ class ProductForm extends Component {
             this.state.category = [...current,name];
         }
         let isError = this.state.category.length > 0 ? false : true;
-        //console.log(isError);
+
         this.setState({
             isErrorCategory: isError,
+            isErrorForm: this.state.isErrorImageLink || this.state.isErrorType || isError,
+            isStart: false
+        });
+
+    }
+
+    handleChangeType = (e) => {
+
+        this.setState({
+            isErrorType: false,
+            isErrorForm: this.state.isErrorImageLink || false || this.state.isErrorCategory,
+            isStart: false
         });
     }
 
 
-    handleChangeQuery = (e) => {
+    handleChangeTitle = (e) => {
         let val = e.target.value;
-
-        console.log(val);
-        val = val.replace(val.substr(0,5));
-
+        //обрезаем введенное значение до 5 символов
+        if (val.length > 20) {
+            val = val.substr(0,20);
+        }
+        //записываем в состояние
         this.setState({
-            query: val,
+            title: val,
         });
     };
 
-    handleChangeTextInput = (e) => {
-        let { target } = e,
-            name = target.name,
-            val =  target.value.length <= 5?  target.value : target.value.substr(0,5);
-            //console.log(val);
-        this.setState({
-            [name]: val,
-        });
-    };
-
-    /*
-    handleToggle = (e) => {
-        this.setState({
-            isOpen: !this.state.isOpen,
-        });
-    };
-
-    handleChangeQuery = (e) => {
+    handleChangeImageLink = (e) => {
         let val = e.target.value;
+        //проверка на валидность ссылки
+        let isValid = /^(ftp|http|https):\/\/[^ "]+$/.test(val);
+        if (isValid) {
+            this.setState({
+                imageLink: val,
+                isErrorImageLink: false,
+                isErrorForm: false || this.state.isErrorType || this.state.isErrorCategory,
+                isStart: false
+            });
+        } else {
+            this.setState({
+                isErrorImageLink: true,
+                isErrorForm: true,
+                isStart: false
+            });
+        }
+        console.log(this.state.isErrorForm);
+    }
 
-        console.log(val);
-        val = val.replace(/\D/gmi, '');
 
-        this.setState({
-            query: val,
-        });
-    };
-
-    handleChangeTextInput = (e) => {
-        let { target } = e,
-            name = target.name,
-            val = target.value;
-
-        this.setState({
-            [name]: val,
-        });
-    };
-
-    handleSelectCountry = (e) => {
+    handleChangeDescription = (e) => {
         let val = e.target.value;
+        //обрезаем введенное значение до 200 символов
+        if (val.length > 200) {
+            val = val.substr(0,200);
+        }
+        //записываем в состояние
         this.setState({
-            country: val,
+            description: val
         });
     };
 
-    handleSubmit = (e) => {
-        e.preventDefault();
 
-        let account = {
-            id: new Date().getTime(),
-            name: this.state.firstName,
-            lastName: this.state.lastName,
-            country: this.state.country,
-        };
 
-        this.setState({
-            accounts: [...this.state.accounts, account],
-        });
-    };
-     */
 
     /*
     Компонент ProductForm должен принимать проп handleSubmit с функцией для обработки отправки формы.
     По умолчанию этот проп должен быть равен console.log.
 
-        код продукта - текст
+    код продукта - текст
     заголовок - текст
     описание - textarea
     ссылка на изображение - текст
@@ -152,79 +143,101 @@ class ProductForm extends Component {
     тип продукта - обязательное поле
     страны-производители - обязательное поле
 
-Для валидации добавить показ сообщения об ошибке под каждым полем. Если хотя бы 1 поле не валидное - делать кнопку отправки формы disabled.
+    Для валидации добавить показ сообщения об ошибке под каждым полем. Если хотя бы 1 поле не валидное -
+    делать кнопку отправки формы disabled.
      */
 
-/*
 
- */
     render() {
         return (
-            <form onSubmit={this.handleSubmit} className="filters">
+            <form onSubmit={this.handleSubmit} className="filters" style={{width:"450px",margin:"0 auto"}}>
                 <div className="filters__cont">
-                    <button type="button" onClick={this.handleToggle} className="filters__toggler">
-                        {this.state.isOpen ? "Close" : "Open"}
-                    </button>
 
-                    <div className="filters__content">
-                        <div>
-                            <label htmlFor="">Код продукта <input type="text" name="code" value={this.state.code} onChange={this.handleChangeTextInput} /></label>
-                        </div>
-                        <div>
-                            <label htmlFor="">Заголовок <input type="text" name="title" value={this.state.title} onChange={this.handleChangeTextInput} /></label>
-                        </div>
-                        <div>
-                            <label htmlFor="">Ссылка на изображение <input type="text" name="imageLink" value={this.state.imagelink} onChange={this.handleChangeTextInput} /></label>
-                        </div>
-                        <div>
-                            <label htmlFor="">Описание <textarea type="text" name="description" value={this.state.description} onChange={this.handleChangeTextInput}></textarea> </label>
-                        </div>
 
-                        <div>
-                            <p>Категории</p>
-                            {
-                                categories.map((el) => (
-                                    <label htmlFor="">{el}<input onChange = {this.handleChangeCategory} type="checkbox" name={el} /></label>
-                                ))
-                            }
-                            {
-                                this.state.isErrorCategory && (<div style={{color:"red"}}>Не выбрана ни одна категория!</div>)
-                            }
-                            {/* el.categories.length > 0 && <div>Категории</div> */}
-                        </div>
 
-                        <div>
-                            <p>Тип продукта</p>
-                            {
-                                types.map((el) => (
-                                    <label htmlFor="">{el}<input type="radio" name="{el}" /></label>
-                                ))
-                            }
-                        </div>
-
-                        <div>
-                            {
-                                <label htmlFor="">Акционный продукт<input type="checkbox" name="action" /></label>
-                            }
-                        </div>
-
-                        <div>
-                            <label htmlFor="">Страна: <select value={this.state.country} onChange={this.handleSelectCountry}>
-                                <option>- select -</option>
-                                {countries.map(countryLabel => (
-                                    <option key={countryLabel} value={countryLabel}>{countryLabel}</option>
-                                ))}
-                            </select></label>
-                        </div>
-
-                        <input type="submit" value="Отправить"/>
+                    <div className="input-group mb-3">
+                        <span className="input-group-text" id="basic-addon1">Код продукта</span>
+                        <input type="text" className="form-control" value={this.state.code} onChange={this.handleChangeCode} placeholder="код продукта" aria-label="Код продукта"
+                               aria-describedby="basic-addon1"/>
                     </div>
 
-                </div>
-                <div>
+                    <div className="input-group mb-3">
+                        <span className="input-group-text" id="basic-addon1">Заголовок</span>
+                        <input type="text" className="form-control" value={this.state.title} onChange={this.handleChangeTitle} placeholder="" aria-label="Заголовок"
+                               aria-describedby="basic-addon1"/>
+                    </div>
+
+                    <div className="input-group mb-3">
+                        <span className="input-group-text" id="basic-addon1">Ссылка на изображение</span>
+                        <input type="text" className="form-control"  onChange={this.handleChangeImageLink} placeholder="" aria-label="Ссылка на изображение"
+                               aria-describedby="basic-addon1"/>
+                    </div>
+                    {(this.state.isErrorImageLink && !this.state.isStart) && (<div style={{color:"red",border:"1px solid red"}}>Ссылка невалидна!</div>)}
+
+                    <div className="input-group">
+                        <span className="input-group-text">Описание</span>
+                        <textarea className="form-control" aria-label="Описание" value={this.state.description} onChange={this.handleChangeDescription}></textarea>
+                    </div>
+
+                    <div>
+                        <p className={"bold_w"}>Категории</p>
+                        {
+                            categories.map((el,i) => (
+                                <div key={i} className="form-check">
+                                    <input className="form-check-input" type="checkbox" name={el} value="" id={el} onChange = {this.handleChangeCategory} />
+                                    <label className="form-check-label" htmlFor={el}> {el} </label>
+                                </div>
+                            ))
+                        }
+                        {
+                            (this.state.isErrorCategory && !this.state.isStart)  && (<div style={{color:"red",border:"1px solid red"}}>Не выбрана ни одна категория!</div>)
+                        }
+                    </div>
+
+                    <div>
+                        <p className={"bold_w"}>Тип продукта</p>
+                        {
+                            types.map((el,i) => (
 
 
+                            <div key={i} className="form-check">
+                                <input className="form-check-input" type="radio" name="type" id={el} onChange = {this.handleChangeType}/>
+                                <label className="form-check-label" htmlFor={el}> {el} </label>
+                            </div>
+                            ))
+                        }
+                        {
+                            (this.state.isErrorType && !this.state.isStart)  && (<div style={{color:"red",border:"1px solid red"}}>Не выбран ни один тип!</div>)
+                        }
+                    </div>
+
+                    <div>
+                        <p className={"bold_w"}>Участие в акции</p>
+                        {
+                            <div className="form-check">
+                            <input className="form-check-input" type="checkbox" name="action" value="" id="" />
+                            <label className="form-check-label" htmlFor="action"> Акционный продукт </label>
+                            </div>
+                        }
+                    </div>
+
+
+                    <div className="form-group">
+                        <label htmlFor="exampleFormControlSelect1" className={"bold_w"}>Страна</label>
+                        <select multiple className="form-control" id="exampleFormControlSelect1">
+                            <option>---</option>
+                            {countries.map(countryLabel => (
+                                <option key={countryLabel} value={countryLabel}>{countryLabel}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <input className="btn btn-primary" style={{ margin:"10px 0 0 0" }} type="submit" disabled={this.state.isErrorForm} value="Отправить"/>
+
+
+
                 </div>
+
             </form>
         );
     }
@@ -235,20 +248,12 @@ export default ProductForm;
 
 
 ProductForm.propTypes = {
-    code: PropTypes.number.isRequired,
-    title: PropTypes.string.isRequired,
-    imageLink: PropTypes.string,
-    description: PropTypes.string,
-    category: PropTypes.isRequired,
-    type: PropTypes.isRequired,
-    country: PropTypes.isRequired,
-   // as: PropTypes.oneOf(["link", "button", "div"]).isRequired,
+
 };
 
 ProductForm.defaultProps = {
     handleSubmit: (e) => {
         e.preventDefault();
-        //this.state.isErrorCategory = this.state.category.length > 0 ? false : true;
         console.log('by default')
     }
 };

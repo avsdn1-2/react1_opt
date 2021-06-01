@@ -40,6 +40,7 @@
 .bold_w
 {
   font-weight:bold;
+  margin-top:15px;
 }
 .off {
   display:none;
