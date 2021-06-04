@@ -13,7 +13,7 @@ function App() {
   return (
     <div className="App">
 
-        <ProductForm key="1"/>
+        <ProductForm key="1" onSubmit={"handleSubmit"}/>
 
     </div>
   );
